@@ -8,6 +8,7 @@ GET http://localhost:8000/items?q=foo
 GET http://localhost:8000/items?q=foobar
 
 ### Get item by id
-GET http://localhost:8000/items/bar/
+GET http://localhost:8000/items/get_by_id?item_id=foo
+
 
 
