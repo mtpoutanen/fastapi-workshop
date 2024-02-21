@@ -19,3 +19,12 @@ class ItemQuery(BaseDto):
 
 class Item(BaseDto):
     value: str
+
+
+class AuthRequest(BaseDto):
+    username: str
+    password: str
+
+
+class AuthResponse(BaseDto):
+    token: str
