@@ -1,30 +1,9 @@
-from fastapi import FastAPI, Path, Query, Depends
-from typing import Annotated, Any
-from pydantic import BaseModel, AfterValidator, Field
+from fastapi import FastAPI, Depends
+
+from demoapp.dependencies import Item, get_database
+from demoapp.models import ItemByIdRequest, ItemQuery
 
 app = FastAPI()
-
-
-class BaseDto(BaseModel):
-    """
-    Base data transfer objects model.
-    Should be used as a base model for all others dto models
-    """
-
-
-class ItemByIdRequest(BaseDto):
-    item_id: str
-
-
-class ItemQuery(BaseDto):
-    q: str = Field(Query(max_length=5, description="Query string, scan item values for a partial match"))
-
-
-class Item(BaseDto):
-    value: str
-
-
-fake_db: dict[str, Item] = {"foo": Item(value="foo value"), "bar": Item(value="bar value")}
 
 
 @app.get("/")
@@ -33,7 +12,7 @@ def root() -> dict[str, str]:
 
 
 @app.get("/items/get_by_id")
-def item_by_id(request: ItemByIdRequest = Depends()) -> Item:
+def item_by_id(request: ItemByIdRequest = Depends(), fake_db: dict[str, Item] = Depends(get_database)) -> Item:
     """
     Get item by id
     """
@@ -41,10 +20,11 @@ def item_by_id(request: ItemByIdRequest = Depends()) -> Item:
 
 
 @app.get("/items")
-def items(request: ItemQuery = Depends()) -> dict[str, Item]:
+def items(request: ItemQuery = Depends(), fake_db: dict[str, Item] = Depends(get_database)) -> list[Item]:
     """
     Get all items
     """
-    if request:
-        return {item_id: item for item_id, item in fake_db.items() if request.q in item.value}
-    return fake_db
+    print("Returning items")
+    if request.q:
+        return list(filter(lambda x: request.q in x.value, fake_db.values()))
+    return list(fake_db.values())
